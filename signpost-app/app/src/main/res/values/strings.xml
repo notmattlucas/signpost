@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Signpost</string>
+    <string name="title_activity_maps">MapsActivity</string>
+    <string name="message">Message</string>
+</resources>
