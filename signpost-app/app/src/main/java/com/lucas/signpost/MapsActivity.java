@@ -7,20 +7,31 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.lucas.signpost.model.Loc;
+import com.lucas.signpost.viewmodel.MessagesViewModel;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -28,33 +39,37 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Manifest.permission.ACCESS_FINE_LOCATION
     };
 
-    private GoogleMap mMap;
+    private GoogleMap map;
 
     private Location initial;
 
-    private final LocationListener locationListener = new LocationListener() {
+    @Inject
+    MessagesViewModel messages;
 
-        @Override
-        public void onLocationChanged(@NonNull Location location) {
-            LatLng pos = new LatLng(location.getLatitude(), location.getLongitude());
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(pos));
-        }
+    private List<Marker> markers = new ArrayList<>();
 
+    private final LocationListener locationListener = location -> {
+        LatLng pos = new LatLng(location.getLatitude(), location.getLongitude());
+        updateMapPosition(pos);
     };
 
+    @RequiresApi(api = Build.VERSION_CODES.S)
     @SuppressLint("MissingPermission")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        ((MainApplication)getApplicationContext()).applicationComponent.inject(this);
+
         if (!canAccessLocation()) {
             requestPermissions(INITIAL_PERMS, 1);
         }
 
-        setContentView(R.layout.activity_maps);
+        DataBindingUtil.setContentView(this, R.layout.activity_maps);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        assert mapFragment != null;
         mapFragment.getMapAsync(this);
 
         LocationManager locationMgr = (LocationManager)getSystemService(LOCATION_SERVICE);
@@ -72,33 +87,46 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     *
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        map = googleMap;
+        configureMap();
+        LatLng pos = getCurrentPosition();
+        updateMapPosition(pos);
+        messages.getMessages().observeForever(messages -> {
+            messages.forEach(message -> {
+                Loc loc = message.getLocation();
+                LatLng position = new LatLng(loc.getLatitude(), loc.getLongitude());
+                Marker marker = map.addMarker(new MarkerOptions()
+                        .position(position)
+                        .title(message.getMessage())
+                );
+                markers.add(marker);
+            });
+        });
+    }
 
-        // Add a marker in Sydney and move the camera
+    private void updateMapPosition(LatLng pos) {
+        map.moveCamera(CameraUpdateFactory.newLatLng(pos));
+        Loc loc = new Loc(pos.latitude, pos.longitude);
+        messages.update(loc);
+    }
+
+    private void configureMap() {
+        map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+        UiSettings uiSettings = map.getUiSettings();
+        uiSettings.setCompassEnabled(true);
+        uiSettings.setMyLocationButtonEnabled(true);
+        map.moveCamera(CameraUpdateFactory.zoomTo(19));
+    }
+
+    @NonNull
+    private LatLng getCurrentPosition() {
         LatLng pos = new LatLng(0, 0);
         if (initial != null) {
             pos = new LatLng(initial.getLatitude(), initial.getLongitude());
         }
-
-        mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-        UiSettings uiSettings = mMap.getUiSettings();
-        uiSettings.setCompassEnabled(true);
-        uiSettings.setMyLocationButtonEnabled(true);
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(pos));
-        mMap.moveCamera(CameraUpdateFactory.zoomTo(19));
+        return pos;
     }
 
     private boolean canAccessLocation() {
