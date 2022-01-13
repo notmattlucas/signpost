@@ -1,7 +1,7 @@
 package com.lucas.signpost.di;
 
-import com.lucas.signpost.data.DummyMessageRepository;
 import com.lucas.signpost.data.MessageRepository;
+import com.lucas.signpost.data.RealmMessageRepository;
 
 import javax.inject.Singleton;
 
@@ -14,7 +14,7 @@ public class MessagesModule {
     @Provides
     @Singleton
     public MessageRepository messageRepository() {
-        return new DummyMessageRepository();
+        return new RealmMessageRepository();
     }
 
 }

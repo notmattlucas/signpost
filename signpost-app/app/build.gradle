@@ -3,6 +3,11 @@ plugins {
     id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
 }
 
+apply plugin: 'realm-android'
+
+def localProperties = new Properties()
+localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+
 android {
     compileSdk 32
 
@@ -21,6 +26,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            resValue("string", "realm_app_id", localProperties['REALM_APP_ID'])
+            resValue("string", "google_client_id", localProperties['GOOGLE_CLIENT_ID'])
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -36,13 +45,26 @@ android {
 
 }
 
+realm {
+    syncEnabled = true
+}
+
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.4.0'
     implementation 'com.google.android.material:material:1.3.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'com.google.android.gms:play-services-maps:18.0.1'
-    implementation 'com.google.android.material:material:1. 4.0'
+    implementation 'com.google.android.material:material:1.4.0'
     implementation 'com.google.dagger:dagger:2.40.5'
+    implementation 'com.google.android.gms:play-services-auth:19.2.0'
+    implementation 'androidx.annotation:annotation:1.2.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.3.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.13.1'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.13.1'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'

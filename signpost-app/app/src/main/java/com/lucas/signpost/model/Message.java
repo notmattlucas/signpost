@@ -1,14 +1,30 @@
 package com.lucas.signpost.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Message {
 
+    @JsonProperty("id")
+    private String id;
+
+    @JsonProperty("message")
     private String message;
 
-    private Loc loc;
+    @JsonProperty("user")
+    private String user;
+
+    @JsonProperty("location")
+    private Loc location;
+
+    @JsonIgnore
+    private boolean owner;
+
+    public Message() {}
 
     public Message(String message, Loc loc) {
         this.message = message;
-        this.loc = loc;
+        this.location = loc;
     }
 
     public String getMessage() {
@@ -20,11 +36,37 @@ public class Message {
     }
 
     public Loc getLocation() {
-        return loc;
+        return location;
     }
 
     public void setLocation(Loc loc) {
-        this.loc = loc;
+        this.location = loc;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        if (this.id == null) {
+            this.id = id;
+        }
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public boolean owned() {
+        return owner;
+    }
+
+    public void setOwner(boolean owner) {
+        this.owner = owner;
     }
 
 }

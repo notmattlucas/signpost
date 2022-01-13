@@ -1,4 +1,4 @@
-package com.lucas.signpost;
+package com.lucas.signpost.ui;
 
 
 import android.Manifest;
@@ -9,17 +9,23 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.Window;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
+import com.lucas.signpost.MainApplication;
+import com.lucas.signpost.R;
+import com.lucas.signpost.SearchResultListDialogFragment;
 import com.lucas.signpost.model.Loc;
 import com.lucas.signpost.viewmodel.MessagesViewModel;
 
@@ -31,6 +37,7 @@ import javax.inject.Inject;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.databinding.DataBindingUtil;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -59,7 +66,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ((MainApplication)getApplicationContext()).applicationComponent.inject(this);
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        ((MainApplication)getApplicationContext()).applicationComponent.injectMaps(this);
 
         if (!canAccessLocation()) {
             requestPermissions(INITIAL_PERMS, 1);
@@ -78,38 +87,87 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         locationMgr.requestLocationUpdates(LocationManager.FUSED_PROVIDER, 0, 0, locationListener);
         locationMgr.requestLocationUpdates(LocationManager.FUSED_PROVIDER, 10000, 10, locationListener);
 
+    }
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view -> {
-            Snackbar.make(view, "Here's a Snackbar", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options_menu, menu);
+        // Associate searchable configuration with the SearchView
+        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        MessagesViewModel repository = this.messages;
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                repository.search(query, messages -> {
+                    messages.forEach(message -> {
+                        message.setMessage(message.getMessage().replaceAll(query, "<b>" + query + "</b>"));
+                    });
+                    searchView.setQuery("", false);
+                    searchView.clearFocus();
+                    searchView.setIconified(true);
+                    SearchResultListDialogFragment dialog = SearchResultListDialogFragment.newInstance(messages, repository);
+                    dialog.show(getSupportFragmentManager(), "Search Results");
+                });
+                return true;
+            }
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
         });
-
+        return true;
     }
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         map = googleMap;
         configureMap();
-        LatLng pos = getCurrentPosition();
-        updateMapPosition(pos);
-        messages.getMessages().observeForever(messages -> {
-            messages.forEach(message -> {
-                Loc loc = message.getLocation();
-                LatLng position = new LatLng(loc.getLatitude(), loc.getLongitude());
-                Marker marker = map.addMarker(new MarkerOptions()
-                        .position(position)
-                        .title(message.getMessage())
-                );
-                markers.add(marker);
-            });
+        updateMapPosition(getCurrentPosition());
+        messages.getPosition().observeForever(position -> {
+            moveCamera(new LatLng(position.getLatitude(), position.getLongitude()));
+        });
+        messages.getMessages().observeForever(this::drawMarkers);
+        map.setOnMapClickListener(latLng -> {
+            WriteMessageFragment modalBottomSheet = new WriteMessageFragment(messages, loc(latLng));
+            modalBottomSheet.show(getSupportFragmentManager(), "Modal Bottom Sheet");
         });
     }
 
+    private void drawMarkers(com.lucas.signpost.model.Messages messages) {
+        clearMarkers();
+        messages.forEach(message -> {
+            Loc loc = message.getLocation();
+            LatLng position = new LatLng(loc.getLatitude(), loc.getLongitude());
+            float hue = message.owned() ? BitmapDescriptorFactory.HUE_AZURE : BitmapDescriptorFactory.HUE_ORANGE;
+            BitmapDescriptor icon = BitmapDescriptorFactory.defaultMarker(hue);
+            Marker marker = map.addMarker(new MarkerOptions()
+                    .position(position)
+                    .icon(icon)
+                    .title(message.getMessage())
+            );
+            marker.showInfoWindow();
+            markers.add(marker);
+        });
+    }
+
+    private void clearMarkers() {
+        markers.forEach(Marker::remove);
+        markers.clear();
+    }
+
     private void updateMapPosition(LatLng pos) {
-        map.moveCamera(CameraUpdateFactory.newLatLng(pos));
-        Loc loc = new Loc(pos.latitude, pos.longitude);
+        Loc loc = loc(pos);
         messages.update(loc);
+    }
+
+    private void moveCamera(LatLng pos) {
+        map.animateCamera(CameraUpdateFactory.newLatLng(pos));
+    }
+
+    @NonNull
+    private static Loc loc(LatLng pos) {
+        return new Loc(pos.latitude, pos.longitude);
     }
 
     private void configureMap() {

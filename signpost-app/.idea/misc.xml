@@ -4,9 +4,25 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.371875" />
+        <entry key="app/src/main/res/drawable/ic_baseline_message_24.xml" value="0.371875" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.371875" />
+        <entry key="app/src/main/res/drawable/search.xml" value="0.371875" />
+        <entry key="app/src/main/res/layout-w1240dp/activity_login.xml" value="0.1" />
+        <entry key="app/src/main/res/layout-w1240dp/search_results_dialog.xml" value="0.13755020080321284" />
+        <entry key="app/src/main/res/layout-w936dp/activity_login.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_login.xml" value="0.19791666666666666" />
         <entry key="app/src/main/res/layout/activity_maps.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/fragment_item_list_dialog_list_dialog.xml" value="0.178125" />
+        <entry key="app/src/main/res/layout/fragment_message_publish.xml" value="0.35572916666666665" />
+        <entry key="app/src/main/res/layout/fragment_message_publish_item.xml" value="0.35572916666666665" />
         <entry key="app/src/main/res/layout/map.xml" value="0.33559782608695654" />
+        <entry key="app/src/main/res/layout/modal_bottom_sheet_content.xml" value="0.35572916666666665" />
+        <entry key="app/src/main/res/layout/search_result.xml" value="0.35572916666666665" />
+        <entry key="app/src/main/res/layout/search_result_item.xml" value="0.2140625" />
+        <entry key="app/src/main/res/layout/search_results.xml" value="0.19895833333333332" />
+        <entry key="app/src/main/res/layout/search_results_dialog.xml" value="0.35572916666666665" />
+        <entry key="app/src/main/res/layout/write_message_dialog.xml" value="0.2140625" />
+        <entry key="app/src/main/res/menu/options_menu.xml" value="0.35572916666666665" />
       </map>
     </option>
   </component>

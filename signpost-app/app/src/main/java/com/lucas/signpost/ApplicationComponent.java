@@ -1,6 +1,8 @@
 package com.lucas.signpost;
 
 import com.lucas.signpost.di.MessagesModule;
+import com.lucas.signpost.ui.LoginActivity;
+import com.lucas.signpost.ui.MapsActivity;
 
 import javax.inject.Singleton;
 
@@ -12,6 +14,8 @@ import dagger.Component;
 @Singleton
 public interface ApplicationComponent {
 
-    void inject(MapsActivity mapsActivity);
+    void injectMaps(MapsActivity mapsActivity);
+
+    void injectLogin(LoginActivity loginActivity);
 
 }

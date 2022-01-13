@@ -1,10 +1,9 @@
 package com.lucas.signpost.model;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import androidx.databinding.Bindable;
+import io.realm.RealmList;
 
 public class Messages {
 
@@ -15,11 +14,17 @@ public class Messages {
     }
 
     public Messages() {
-        this.messages = new ArrayList<>();
+        this.messages = new RealmList<>();
     }
 
     public void forEach(Consumer<Message> action) {
         messages.forEach(action);
     }
+
+    public void add(Message message) {
+        messages.add(message);
+    }
+
+    public List<Message> get() { return messages; };
 
 }
