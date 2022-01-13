@@ -21,6 +21,9 @@ import io.realm.mongodb.App;
 import io.realm.mongodb.User;
 import io.realm.mongodb.functions.Functions;
 
+/**
+ * {@inheritDoc}
+ */
 public class RealmMessageRepository implements MessageRepository {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -29,11 +32,17 @@ public class RealmMessageRepository implements MessageRepository {
 
     private String user;
 
+    /**
+     * {@inheritDoc}
+     */
     public void init(App app) {
         this.app = app;
         this.user = app.currentUser().getId();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void getLocalMessages(Loc loc, Consumer<Messages> cbk) {
         Functions functions = getFunctions();
@@ -47,6 +56,9 @@ public class RealmMessageRepository implements MessageRepository {
         });
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void upsert(Message message) {
         message.setId(new ObjectId().toString());
@@ -66,6 +78,9 @@ public class RealmMessageRepository implements MessageRepository {
         });
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void search(String term, Consumer<List<Message>> cbk) {
         Functions functions = getFunctions();
@@ -79,6 +94,9 @@ public class RealmMessageRepository implements MessageRepository {
         });
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @NonNull
     private List<Message> convert(App.Result<List> result) {
         List<Message> messages = new ArrayList<>();

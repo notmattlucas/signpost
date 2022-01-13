@@ -30,8 +30,8 @@ public class WriteMessageFragment extends BottomSheetDialogFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.write_message_dialog, container, false);
-        Button btn = (Button) view.findViewById(R.id.submit);
-        EditText txt = (EditText) view.findViewById(R.id.message);
+        Button btn = view.findViewById(R.id.submit);
+        EditText txt = view.findViewById(R.id.message);
 
         btn.setOnClickListener(v -> {
             String message = txt.getText().toString();
@@ -41,6 +41,5 @@ public class WriteMessageFragment extends BottomSheetDialogFragment {
 
         return view;
     }
-
 
 }

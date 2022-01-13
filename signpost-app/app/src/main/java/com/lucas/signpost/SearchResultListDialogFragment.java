@@ -23,16 +23,8 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-/**
- * <p>A fragment that shows a list of items as a modal bottom sheet.</p>
- * <p>You can show this modal bottom sheet from your activity like this:</p>
- * <pre>
- *     SearchResultListDialogFragment.newInstance(30).show(getSupportFragmentManager(), "dialog");
- * </pre>
- */
 public class SearchResultListDialogFragment extends BottomSheetDialogFragment {
 
-    // TODO: Customize parameter argument names
     private static final String ARG_MESSAGES = "messages";
 
     private SearchResultsBinding binding;
@@ -46,7 +38,6 @@ public class SearchResultListDialogFragment extends BottomSheetDialogFragment {
         this.model = model;
     }
 
-    // TODO: Customize parameters
     public static SearchResultListDialogFragment newInstance(List<Message> messages, MessagesViewModel model) {
         final SearchResultListDialogFragment fragment = new SearchResultListDialogFragment(messages, model);
         final Bundle args = new Bundle();

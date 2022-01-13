@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
+/**
+ * Point in geolocation space
+ */
 public class Loc {
 
     @JsonProperty("latitude")

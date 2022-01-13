@@ -1,7 +1,5 @@
 package com.lucas.signpost.viewmodel;
 
-import android.util.Log;
-
 import com.lucas.signpost.data.MessageRepository;
 import com.lucas.signpost.model.Loc;
 import com.lucas.signpost.model.Message;

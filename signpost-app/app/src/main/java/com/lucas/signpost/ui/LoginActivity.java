@@ -26,6 +26,9 @@ import io.realm.mongodb.Credentials;
 import io.realm.mongodb.User;
 import io.realm.mongodb.auth.GoogleAuthType;
 
+/**
+ * Startup screen, that involves login and permissions flows
+ */
 public class LoginActivity extends AppCompatActivity {
 
     private ActivityLoginBinding binding;
@@ -54,12 +57,10 @@ public class LoginActivity extends AppCompatActivity {
                 .build();
         GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(this, gso);
         Intent signInIntent = googleSignInClient.getSignInIntent();
-        ActivityResultLauncher<Intent> resultLauncher =
-                registerForActivityResult(
+        ActivityResultLauncher<Intent> resultLauncher = registerForActivityResult(
                         new ActivityResultContracts.StartActivityForResult(),
                         result -> {
-                            Task<GoogleSignInAccount> task =
-                                    GoogleSignIn.getSignedInAccountFromIntent(result.getData());
+                            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(result.getData());
                             handleSignInResult(task);
                         });
         resultLauncher.launch(signInIntent);
@@ -70,32 +71,37 @@ public class LoginActivity extends AppCompatActivity {
             if (completedTask.isSuccessful()) {
                 GoogleSignInAccount account = completedTask.getResult(ApiException.class);
                 String token = account.getIdToken();
-                Credentials googleCredentials =
-                        Credentials.google(token, GoogleAuthType.ID_TOKEN);
-                String realmAppId = getResources().getString(R.string.realm_app_id);
-                App app = new App(new AppConfiguration.Builder(realmAppId).build());
-                app.loginAsync(googleCredentials, it -> {
-                    if (it.isSuccess()) {
-                        User login = it.get();
-                        if (login.isLoggedIn()) {
-                            messageRepository.init(app);
-                            Intent intent = new Intent(this, MapsActivity.class);
-                            startActivity(intent);
-                        } else {
-                            this.finishAndRemoveTask();
-                        }
-                    } else {
-                        this.finishAndRemoveTask();
-                    }
-                });
+                Credentials googleCredentials = Credentials.google(token, GoogleAuthType.ID_TOKEN);
+                loginToRealm(googleCredentials);
             } else {
-                Log.e("AUTH", "Google Auth failed: "
-                        + completedTask.getException().toString());
+                Log.e("AUTH", "Google Auth failed: " + completedTask.getException().toString());
             }
         } catch (ApiException e) {
             Log.w("AUTH", "Failed to log in with Google OAuth: " + e.getMessage());
         }
     }
 
+    private void loginToRealm(Credentials googleCredentials) {
+        String realmAppId = getResources().getString(R.string.realm_app_id);
+        App app = new App(new AppConfiguration.Builder(realmAppId).build());
+        app.loginAsync(googleCredentials, it -> {
+            if (it.isSuccess()) {
+                User login = it.get();
+                if (login.isLoggedIn()) {
+                    onSuccessfulInit(app);
+                } else {
+                    this.finishAndRemoveTask();
+                }
+            } else {
+                this.finishAndRemoveTask();
+            }
+        });
+    }
+
+    private void onSuccessfulInit(App app) {
+        messageRepository.init(app);
+        Intent intent = new Intent(this, MapsActivity.class);
+        startActivity(intent);
+    }
 
 }

@@ -8,6 +8,9 @@ import javax.inject.Singleton;
 
 import dagger.Component;
 
+/**
+ * Dependency Injection (Dagger)
+ */
 @Component(
         modules = {MessagesModule.class}
 )

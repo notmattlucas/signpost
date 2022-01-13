@@ -3,6 +3,9 @@ package com.lucas.signpost.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * A single message at a location
+ */
 public class Message {
 
     @JsonProperty("id")
@@ -17,6 +20,9 @@ public class Message {
     @JsonProperty("location")
     private Loc location;
 
+    /**
+     * Whether the current user owns the message
+     */
     @JsonIgnore
     private boolean owner;
 

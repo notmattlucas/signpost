@@ -86,7 +86,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         initial = locationMgr.getLastKnownLocation(LocationManager.FUSED_PROVIDER);
         locationMgr.requestLocationUpdates(LocationManager.FUSED_PROVIDER, 0, 0, locationListener);
         locationMgr.requestLocationUpdates(LocationManager.FUSED_PROVIDER, 10000, 10, locationListener);
-
     }
 
     @Override
@@ -136,19 +135,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void drawMarkers(com.lucas.signpost.model.Messages messages) {
         clearMarkers();
-        messages.forEach(message -> {
-            Loc loc = message.getLocation();
-            LatLng position = new LatLng(loc.getLatitude(), loc.getLongitude());
-            float hue = message.owned() ? BitmapDescriptorFactory.HUE_AZURE : BitmapDescriptorFactory.HUE_ORANGE;
-            BitmapDescriptor icon = BitmapDescriptorFactory.defaultMarker(hue);
-            Marker marker = map.addMarker(new MarkerOptions()
-                    .position(position)
-                    .icon(icon)
-                    .title(message.getMessage())
-            );
-            marker.showInfoWindow();
-            markers.add(marker);
-        });
+        messages.forEach(this::drawMarker);
+    }
+
+    private void drawMarker(com.lucas.signpost.model.Message message) {
+        Loc loc = message.getLocation();
+        LatLng position = new LatLng(loc.getLatitude(), loc.getLongitude());
+        float hue = message.owned() ? BitmapDescriptorFactory.HUE_AZURE : BitmapDescriptorFactory.HUE_ORANGE;
+        BitmapDescriptor icon = BitmapDescriptorFactory.defaultMarker(hue);
+        Marker marker = map.addMarker(new MarkerOptions()
+                .position(position)
+                .icon(icon)
+                .title(message.getMessage())
+        );
+        marker.showInfoWindow();
+        markers.add(marker);
     }
 
     private void clearMarkers() {

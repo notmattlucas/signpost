@@ -5,6 +5,9 @@ import java.util.function.Consumer;
 
 import io.realm.RealmList;
 
+/**
+ * Set of messagess
+ */
 public class Messages {
 
     private List<Message> messages;
